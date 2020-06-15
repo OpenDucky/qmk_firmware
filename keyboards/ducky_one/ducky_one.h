@@ -19,4 +19,6 @@
 
 #include "quantum.h"
 
+extern uint16_t led_matrix_data[8*16];
+
 #define OVERRIDE __attribute__ ((noinline))

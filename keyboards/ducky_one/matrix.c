@@ -33,6 +33,7 @@ extern ioline_t row_list[MATRIX_ROWS];
 extern ioline_t col_list[MATRIX_COLS];
 
 void matrix_init(void) {
+    led_matrix_init();
     memset(matrix, 0, MATRIX_ROWS * sizeof(matrix_row_t));
     memset(matrix_debouncing, 0, MATRIX_ROWS * sizeof(matrix_row_t));
     memset(debounce_times, 0, MATRIX_ROWS * sizeof(uint32_t));
@@ -68,11 +69,10 @@ uint8_t matrix_scan_key(uint32_t row_line, uint32_t col_line) {
 uint8_t matrix_scan(void) {
     // cache of input ports for columns
     static uint16_t port_cache[3];
-
     // scan each row
     for (int row = 0; row < MATRIX_ROWS; row++) {
         palClearLine(row_list[row]);
-        wait_us(1);
+        __NOP(); __NOP(); __NOP(); __NOP();
         // read i/o ports
         port_cache[0] = palReadPort(IOPORTA);
         port_cache[1] = palReadPort(IOPORTB);
@@ -100,8 +100,8 @@ uint8_t matrix_scan(void) {
             debounce_times[row] = 0;
         }
     }
-
     matrix_scan_quantum();
+
     return 1;
 }
 

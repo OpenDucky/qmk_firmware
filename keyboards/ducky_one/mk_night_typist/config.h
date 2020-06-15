@@ -24,11 +24,10 @@
 #define PRODUCT_ID      0x0141
 #define DEVICE_VER      0x0001
 #define MANUFACTURER    Holtek
-#define PRODUCT         MK Night Typist
+#define PRODUCT         MK Night Typist QMK
 #define DESCRIPTION     MK Night Typist with QMK
 #define NAME_SLUG       "ducky_one/mk_night_typist"
 
-// #define UPDATE_PROTO_POK3R
 
 // key matrix size
 #define MATRIX_ROWS 15
@@ -108,7 +107,7 @@
  * power-up.
  *
  */
-// #define FORCE_NKRO
+#define FORCE_NKRO
 
 /*
  * Magic Key Options

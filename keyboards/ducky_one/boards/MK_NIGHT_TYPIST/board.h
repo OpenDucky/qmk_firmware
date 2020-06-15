@@ -62,6 +62,21 @@
 #define LINE_COL7                   PAL_LINE(IOPORTC, 14)
 #define LINE_COL8                   PAL_LINE(IOPORTC, 15)
 
+// LED Matrix
+#define LED_MASTER_DISABLE                                 PAL_LINE(IOPORTC,  1)
+#define LED_DRV_GCLK                                       PAL_LINE(IOPORTC,  0)
+#define LED_DRV_DATA                                       PAL_LINE(IOPORTC,  2)
+#define LED_DRV_DCLK                                       PAL_LINE(IOPORTA, 14)
+#define LED_DRV_DLE                                        PAL_LINE(IOPORTA, 15)
+#define LED_DRV_Q1                                         PAL_LINE(IOPORTC,  8)
+#define LED_DRV_Q2                                         PAL_LINE(IOPORTC,  7)
+#define LED_DRV_Q3                                         PAL_LINE(IOPORTB,  5)
+#define LED_DRV_Q4                                         PAL_LINE(IOPORTB,  4)
+#define LED_DRV_Q5                                         PAL_LINE(IOPORTB,  3)
+#define LED_DRV_Q6                                         PAL_LINE(IOPORTB,  2)
+#define LED_DRV_Q7                                         PAL_LINE(IOPORTC,  6)
+#define LED_DRV_Q8                                         PAL_LINE(IOPORTC,  5)
+
 // USART (conflicts with LED matrix)
 // #define PAD_USART_TX                8
 
@@ -100,8 +115,9 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-    void uart_send(const char *str);
     void boardInit(void);
+    void led_matrix_init(void);
+    void led_matrix_flush(void);
 #ifdef __cplusplus
 }
 #endif

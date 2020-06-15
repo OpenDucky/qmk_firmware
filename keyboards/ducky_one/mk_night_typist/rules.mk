@@ -2,6 +2,7 @@
 
 SRC = \
 	matrix.c \
+	mbi5042.c \
 
 LAYOUTS += ansi108
 

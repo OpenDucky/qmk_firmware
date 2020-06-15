@@ -66,6 +66,7 @@
 #define HT32_USB_USE_USB0                   TRUE
 #define HT32_USB_USB0_IRQ_PRIORITY          5
 
-#define HT32_PWM_USE_MCTM0                  TRUE
+#define HT32_PWM_USE_GPTM1                  TRUE
+// #define HT32_GPT_BFTM1_IRQ_PRIORITY
 
 #endif /* _MCUCONF_H_ */
