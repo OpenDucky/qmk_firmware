@@ -3,8 +3,8 @@
 
 enum my_keycodes {
     LED_RESET = SAFE_RANGE,
-    LED_INC_ROW,
-    LED_INC_COL,
+    LED_LOW,
+    LED_HIGH,
 };
 
 enum ducky_layers {
@@ -22,7 +22,7 @@ const uint16_t keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     KC_LCTL,  KC_LGUI,  KC_LALT,               KC_SPC,             KC_RALT,  KC_RGUI,  MO(_FUNCTION), KC_RCTL,  KC_LEFT, KC_DOWN, KC_RGHT,        KC_P0,  KC_PDOT
   ),
   [_FUNCTION] = LAYOUT_108_ANSI( /* Base */
-    LED_RESET, LED_INC_ROW, LED_INC_COL, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_CAPS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS
+    LED_RESET, LED_LOW, LED_HIGH, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_CAPS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS
   ),
 };
 
@@ -36,34 +36,45 @@ void matrix_init_user(void) {
 void matrix_scan_user(void) {
 }
 
+layer_state_t layer_state_set_user(layer_state_t layer) {
+    switch(get_highest_layer(layer)) {
+        case _QWERTY:
+            led_matrix_data[4*16+15] = 0;
+            break;
+        case _FUNCTION:
+            led_matrix_data[4*16+15] = 0x4F;
+            break;
+    }
+
+    return layer;
+}
+
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
-    static size_t row = 0, col = 0;
     switch (keycode) {
         case LED_RESET:
             if (record->event.pressed) {
-                for (size_t i = 0; i < 16; i++)
+                for (size_t i = 0; i < 16 * 8; i++)
                 {
-                    led_matrix_data[i]-=0xFF;
+                    led_matrix_data[i] = 0;
                 }
-
             }
             return false;
-        case LED_INC_COL:
+        case LED_LOW:
             if (record->event.pressed) {
-                led_matrix_data[row*16 + col] = 0;
-                if (col < 16)
-                    led_matrix_data[row*16 + col] = 0xFF;
-                else
-                    col = 15;
+                for (size_t i = 0; i < 16 * 8; i++)
+                {
+                    led_matrix_data[i] = 0x4F;
+                }
             }
-        case LED_INC_ROW:
+            return false;
+        case LED_HIGH:
             if (record->event.pressed) {
-                led_matrix_data[row*16 + col] = 0;
-                if (row < 8)
-                    led_matrix_data[row*16 + col] = 0xFF;
-                else
-                    col = 7;
+                for (size_t i = 0; i < 16 * 8; i++)
+                {
+                    led_matrix_data[i] = 0x2000;
+                }
             }
+            return false;
         default:
             break;
     }

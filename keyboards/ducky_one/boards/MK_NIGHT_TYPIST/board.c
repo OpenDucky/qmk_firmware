@@ -20,8 +20,13 @@
 #include "mbi5042.h"
 #include "wait.h"
 #include "ducky_one.h"
+#include "led.h"
 
 #include <string.h>
+/* ============ Private Defines ===================== */
+#ifndef LED_INDICATOR_BRIGHTNESS
+    #define LED_INDICATOR_BRIGHTNESS 0x4F
+#endif
 
 /* ============ Function Prototypes ================== */
 void led_matrix_step(GPTDriver*);
@@ -34,6 +39,7 @@ void led_matrix_step(GPTDriver*);
 
 #define OPEN_DRAIN(PORT) (\
     PBIT(PORT, LED_MASTER_DISABLE) | \
+    PBIT(PORT, LED_DRV_GCLK) | \
     PBIT(PORT, LED_DRV_DATA) | \
     PBIT(PORT, LED_DRV_DCLK) | \
     PBIT(PORT, LED_DRV_DLE) | \
@@ -64,6 +70,7 @@ void led_matrix_step(GPTDriver*);
     PBIT(PORT, LINE_ROW14) | \
     PBIT(PORT, LINE_ROW15) | \
     PBIT(PORT, LED_MASTER_DISABLE) | \
+    PBIT(PORT, LED_DRV_GCLK) | \
     PBIT(PORT, LED_DRV_DATA) | \
     PBIT(PORT, LED_DRV_DCLK) | \
     PBIT(PORT, LED_DRV_DLE) | \
@@ -229,7 +236,7 @@ void __early_init(void) {
 // GPT Initialization
 
 static const GPTConfig bftm0_config = {
-    .frequency = 1000000,
+    .frequency = 2000000,
     .callback = led_matrix_step,
 };
 
@@ -254,7 +261,7 @@ static PWMConfig pwmcfg = {
 };
 
 uint16_t led_matrix_data [8*16] = {
-    0x7FFF,0x7FFF,0x7FFF,0x7FFF,0x7FFF,0x7FFF,0x7FFF,0x7FFF,0xFFFF,0xFFFF,0xFFFF,0xFFFF,0xFFFF,0xFFFF,0xFFFF,0xFFFF,
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -281,13 +288,13 @@ void led_matrix_init(void) {
     palClearLine(LED_MASTER_DISABLE);
 
     mbi5042_configure(&led_controller, 0x86B0);
-    wait_ms(1);
-    mbi5042_flush_data(&led_controller, led_matrix_data);
+    // wait_ms(1);
+    // mbi5042_flush_data(&led_controller, led_matrix_data);
     // Setup PWM
     pwmStart(&PWMD_GPTM1, &pwmcfg);
     pwmEnableChannel(&PWMD_GPTM1, 0, PWM_PERCENTAGE_TO_WIDTH(&PWMD_GPTM1, 5000));
     gptStart(&GPTD_BFTM0, &bftm0_config);
-    gptStartContinuous(&GPTD_BFTM0, 20000);
+    gptStartContinuous(&GPTD_BFTM0, 1000);
 }
 
 #define LED_MATRIX_ROWS 8
@@ -307,12 +314,17 @@ void led_matrix_step(GPTDriver* gptd) {
     palSetLine(led_matrix_rows_lines[current_row]);
     if (++current_row >= LED_MATRIX_ROWS) {
         current_row = 0;
-        mbi5042_flush_data(&led_controller, led_matrix_data);
     }
+    mbi5042_flush_data(&led_controller, &led_matrix_data[current_row * 16]);
     palClearLine(led_matrix_rows_lines[current_row]);
 }
 
-
+bool led_update_kb(led_t status) {
+    led_matrix_data[7*16 + 15] = status.num_lock ? LED_INDICATOR_BRIGHTNESS : 0;
+    led_matrix_data[6*16 + 15] = status.caps_lock ? LED_INDICATOR_BRIGHTNESS : 0;
+    led_matrix_data[5*16 + 15] = status.scroll_lock ? LED_INDICATOR_BRIGHTNESS : 0;
+    return led_update_user(status);
+}
 
 // SPI Initialization
 

@@ -8,9 +8,9 @@ void mbi5042_init(mbi5042_t* pDevice, ioline_t clk, ioline_t le, ioline_t data)
         pDevice->clk = clk;
         pDevice->le = le;
         pDevice->data = data;
-        palClearLine(clk);
-        palClearLine(le);
-        palClearLine(data);
+        palSetLine(clk);
+        palSetLine(le);
+        palSetLine(data);
     }
 }
 
@@ -64,6 +64,8 @@ void mbi5042_configure(mbi5042_t* pDevice, uint16_t configuration) {
  * @param[in] pDevice pointer to a mbi5042_t device handle.
  */
 void mbi5042_flush_data(mbi5042_t* pDevice, uint16_t* pixel) {
+    palClearLine(pDevice->clk);
+    palClearLine(pDevice->le);
     __NOP();
     __NOP();
     __NOP();
@@ -77,34 +79,34 @@ void mbi5042_flush_data(mbi5042_t* pDevice, uint16_t* pixel) {
             } else {
                 palClearLine(pDevice->data);
             }
-            __NOP(); __NOP(); __NOP();
-            if (j == 0) {
-                palSetLine(pDevice->le);
-            }
+            __NOP();
             palSetLine(pDevice->clk);
-            __NOP(); __NOP(); __NOP();
+            __NOP();
             if (j == 0) {
                 palClearLine(pDevice->le);
             }
             palClearLine(pDevice->clk);
-            __NOP(); __NOP(); __NOP();
+            __NOP();
+            if (j == 1) {
+                palSetLine(pDevice->le); __NOP();
+            }
         }
     }
     for (i = 0; i < 4; i++)
     {
         palSetLine(pDevice->clk);
-        __NOP(); __NOP(); __NOP();
+        __NOP();
         palClearLine(pDevice->clk);
-        __NOP(); __NOP(); __NOP();
+        __NOP();
     }
     palSetLine(pDevice->clk); // T4 Rising Edge
     palSetLine(pDevice->le);
-    __NOP(); __NOP();
+    __NOP(); __NOP(); __NOP();
     palClearLine(pDevice->clk); // T4 Falling Edge
-    __NOP(); __NOP();
+    __NOP(); __NOP(); __NOP();
     palSetLine(pDevice->clk); __NOP(); __NOP(); palClearLine(pDevice->clk); __NOP(); __NOP(); // 5
     palSetLine(pDevice->clk); __NOP(); __NOP(); palClearLine(pDevice->clk); __NOP(); __NOP(); // 6
-    palClearLine(pDevice->le);
-    palSetLine(pDevice->clk); __NOP(); __NOP(); palClearLine(pDevice->clk); __NOP(); __NOP(); // 5
+    palClearLine(pDevice->le); __NOP(); __NOP();
+    palSetLine(pDevice->clk);
 }
 

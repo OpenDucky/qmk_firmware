@@ -115,4 +115,3 @@ matrix_row_t matrix_get_row(uint8_t row) {
 
 void matrix_print(void) {
 }
-
