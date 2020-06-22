@@ -294,7 +294,6 @@ void led_matrix_init(void) {
     pwmStart(&PWMD_GPTM1, &pwmcfg);
     pwmEnableChannel(&PWMD_GPTM1, 0, PWM_PERCENTAGE_TO_WIDTH(&PWMD_GPTM1, 5000));
     gptStart(&GPTD_BFTM0, &bftm0_config);
-    gptStartContinuous(&GPTD_BFTM0, 1000);
 }
 
 #define LED_MATRIX_ROWS 8
@@ -324,6 +323,16 @@ bool led_update_kb(led_t status) {
     led_matrix_data[6*16 + 15] = status.caps_lock ? LED_INDICATOR_BRIGHTNESS : 0;
     led_matrix_data[5*16 + 15] = status.scroll_lock ? LED_INDICATOR_BRIGHTNESS : 0;
     return led_update_user(status);
+}
+
+void matrix_scan_kb() {
+    static uint8_t start = 0;
+    syssts_t time = chVTGetSystemTime();
+    if ( (!start) && time > 4000) {
+        gptStartContinuous(&GPTD_BFTM0, 1000);
+        start = 1;
+    }
+    matrix_scan_user();
 }
 
 // SPI Initialization

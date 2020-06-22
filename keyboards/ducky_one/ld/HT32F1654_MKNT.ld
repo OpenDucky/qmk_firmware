@@ -25,7 +25,7 @@
  * HT32F1654 w/ MKNightTypist bootloader memory setup.
  */
 MEMORY {
-    flash0   : org = 0x00000000, len = 64k              /* firmware */
+    flash0   : org = 0x00003000, len = 64k - 12k             /* firmware */
     flash1   : org = 0x00000000, len = 0
     flash2   : org = 0x00000000, len = 0
     flash3   : org = 0x00000000, len = 0
