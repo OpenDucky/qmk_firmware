@@ -500,7 +500,7 @@
  *
  * @note    The default is @p FALSE.
  */
-#define CH_DBG_ENABLE_ASSERTS               TRUE    // adds about 3K code
+#define CH_DBG_ENABLE_ASSERTS               FALSE    // adds about 3K code
 
 /**
  * @brief   Debug option, trace buffer.
